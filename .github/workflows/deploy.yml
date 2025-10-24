@@ -27,6 +27,12 @@ jobs:
       - name: Build Angular app
         run: npm run build -- --configuration production --base-href /angular-openapi-patient/
 
+      - name: Inject Gemini API Key into index.html
+        run: |
+          export INDEX_HTML="dist/angular-openapi-patient/browser/index.html"
+          export INJECT_SCRIPT="<script>window.GEMINI_API_KEY='${{ secrets.GEMINI_API_KEY }}';</script>"
+          sed -i "1s;^;${INJECT_SCRIPT}\n;" "$INDEX_HTML"
+
       - name: Deploy to GitHub Pages
         uses: angular-schule/ngx-deploy-gh-pages@v14
         with:

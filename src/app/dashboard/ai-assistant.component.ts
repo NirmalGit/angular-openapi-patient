@@ -264,6 +264,14 @@ export class AiAssistantComponent {
     this.error.set(null);
     this.results.set(null);
 
+    // Log which engine will be used (Gemini or keyword)
+    const willUseGemini = (this.queryEngine as any).shouldUseGeminiAI?.(this.question);
+    if (willUseGemini) {
+      console.log('%c[AI Assistant] Using Gemini AI for this query','color: #2196f3; font-weight: bold;', this.question);
+    } else {
+      console.log('%c[AI Assistant] Using keyword-based parsing for this query','color: #4caf50; font-weight: bold;', this.question);
+    }
+
     // Execute query through agentic engine with automatic cleanup
     this.queryEngine.executeQuery(this.question)
       .pipe(takeUntilDestroyed(this.destroyRef)) // Angular 20: Automatic subscription cleanup

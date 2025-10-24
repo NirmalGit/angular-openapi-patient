@@ -99,18 +99,8 @@ export class ApiService {
       });
     }
 
-    // Phase 2+: Call real Gemini API with API key
-    const geminiKey = environment.ai.geminiKey;
-    const model = environment.ai.geminiModel;
-    
-    if (!geminiKey) {
-      return new Observable(observer => {
-        observer.error({ message: 'Gemini API key not configured' });
-      });
-    }
-
-    const geminiUrl = `${this.geminiEndpoint}/${model}:generateContent?key=${geminiKey}`;
-    
+    // Use local proxy for Gemini requests
+    const geminiUrl = 'http://localhost:3001/api/gemini';
     const payload = {
       contents: [
         {
