@@ -1,6 +1,7 @@
 import { Component, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -124,8 +125,13 @@ import { SmartDatePipe } from '../shared/smart-date.pipe';
             <div *ngIf="procedureData && procedureData.length > 0" class="space-y-2">
               <h3 class="font-semibold text-gray-900 text-sm mb-2">Procedures Found ({{ procedureData.length }})</h3>
               <div class="space-y-2 max-h-48 overflow-y-auto">
-                <div *ngFor="let proc of procedureData" class="p-2 bg-gray-50 border border-gray-200 rounded text-xs">
-                  <div class="font-semibold text-gray-900">{{ proc.name }}</div>
+                <div *ngFor="let proc of procedureData" 
+                     class="p-2 bg-gray-50 border border-gray-200 rounded text-xs cursor-pointer hover:bg-gray-100 transition-colors"
+                     (click)="viewProcedure(proc.id)">
+                  <div class="flex items-center justify-between">
+                    <div class="font-semibold text-gray-900">{{ proc.name }}</div>
+                    <mat-icon class="text-gray-600 text-sm">arrow_forward</mat-icon>
+                  </div>
                   <div class="text-gray-600 mt-1 space-y-1">
                     <p><strong>Surgeon:</strong> {{ proc.surgeon }}</p>
                     <p><strong>Duration:</strong> {{ proc.duration }}</p>
@@ -141,8 +147,13 @@ import { SmartDatePipe } from '../shared/smart-date.pipe';
               <div *ngIf="results().data && results().data.length > 0" class="space-y-2">
                 <h3 class="font-semibold text-gray-900 text-sm mb-2">Patients Found ({{ results().data.length }})</h3>
                 <div class="space-y-2 max-h-48 overflow-y-auto">
-                  <div *ngFor="let patient of results().data" class="p-2 bg-green-50 border border-green-200 rounded text-xs">
-                    <div class="font-semibold text-gray-900">{{ patient.name }}</div>
+                  <div *ngFor="let patient of results().data" 
+                       class="p-2 bg-green-50 border border-green-200 rounded text-xs cursor-pointer hover:bg-green-100 transition-colors"
+                       (click)="viewPatient(patient.id)">
+                    <div class="flex items-center justify-between">
+                      <div class="font-semibold text-gray-900">{{ patient.name }}</div>
+                      <mat-icon class="text-green-600 text-sm">arrow_forward</mat-icon>
+                    </div>
                     <div class="text-gray-600 mt-1 space-y-1">
                       <p><strong>Age:</strong> {{ patient.age }}</p>
                       <p><strong>Status:</strong> <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{{ patient.status }}</span></p>
@@ -162,18 +173,24 @@ import { SmartDatePipe } from '../shared/smart-date.pipe';
               <!-- Patient Info Results -->
               <div *ngIf="results().data" class="space-y-2">
                 <h3 class="font-semibold text-gray-900 text-sm mb-2">Patient Information</h3>
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded text-xs space-y-1">
-                  <p><strong>Name:</strong> {{ results().data.name }}</p>
-                  <p><strong>Age:</strong> {{ results().data.age }}</p>
-                  <p><strong>Status:</strong> {{ results().data.status }}</p>
-                  <p><strong>Email:</strong> {{ results().data.email }}</p>
-                  <p><strong>Phone:</strong> {{ results().data.phone }}</p>
-                  <p *ngIf="results().data.medicalHistory && results().data.medicalHistory.length > 0">
-                    <strong>Medical History:</strong> {{ results().data.medicalHistory.join(', ') }}
-                  </p>
-                  <p *ngIf="results().data.allergies && results().data.allergies.length > 0">
-                    <strong>Allergies:</strong> {{ results().data.allergies.join(', ') }}
-                  </p>
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded text-xs space-y-1 cursor-pointer hover:bg-blue-100 transition-colors"
+                     (click)="results().data?.id && viewPatient(results().data.id)">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p><strong>Name:</strong> {{ results().data.name }}</p>
+                      <p><strong>Age:</strong> {{ results().data.age }}</p>
+                      <p><strong>Status:</strong> {{ results().data.status }}</p>
+                      <p><strong>Email:</strong> {{ results().data.email }}</p>
+                      <p><strong>Phone:</strong> {{ results().data.phone }}</p>
+                      <p *ngIf="results().data.medicalHistory && results().data.medicalHistory.length > 0">
+                        <strong>Medical History:</strong> {{ results().data.medicalHistory.join(', ') }}
+                      </p>
+                      <p *ngIf="results().data.allergies && results().data.allergies.length > 0">
+                        <strong>Allergies:</strong> {{ results().data.allergies.join(', ') }}
+                      </p>
+                    </div>
+                    <mat-icon *ngIf="results().data?.id" class="text-blue-600 text-sm">arrow_forward</mat-icon>
+                  </div>
                 </div>
               </div>
             }
@@ -232,6 +249,7 @@ import { SmartDatePipe } from '../shared/smart-date.pipe';
 })
 export class AiAssistantComponent {
   private queryEngine = inject(QueryEngineService);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef); // Angular 20 feature for automatic cleanup
 
   question = '';
@@ -282,5 +300,13 @@ export class AiAssistantComponent {
       default:
         return 'bg-gray-100 text-gray-700';
     }
+  }
+
+  viewPatient(patientId: number): void {
+    this.router.navigate(['/patient', patientId]);
+  }
+
+  viewProcedure(procedureId: number): void {
+    this.router.navigate(['/procedure', procedureId]);
   }
 }
