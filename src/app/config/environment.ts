@@ -21,14 +21,10 @@ export const environment = {
 
   // Google Gemini AI Configuration
   ai: {
-    // Gemini API Key - Get from: https://aistudio.google.com/app/apikey
-    // Phase 1: Leave empty (using mock responses)
-    // Phase 2: Add your actual API key here or via environment variable
-    geminiKey: '',
-    geminiModel: 'gemini-1.5-pro',  // or 'gemini-1.5-flash'
-    
-    // Phase 1: Use mock AI responses (no API key needed)
-    useMockAiResponses: true
+    // Gemini API Key is loaded at runtime from window["GEMINI_API_KEY"] for local/dev, or injected at build for prod
+    geminiKey: (window as any)["GEMINI_API_KEY"] || '',
+    geminiModel: 'gemini-2.0-flash',  // Latest model
+    useMockAiResponses: false
   },
 
   // Feature Flags

@@ -28,11 +28,11 @@ export class ApiService {
       'Content-Type': 'application/json'
     });
 
-    // Phase 2+: Add JWT token if available
-    const token = localStorage.getItem(environment.auth.tokenKey);
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
+    // Phase 2+: Add JWT token if available (placeholder for now)
+    // const token = localStorage.getItem('auth_token');
+    // if (token) {
+    //   headers = headers.set('Authorization', `Bearer ${token}`);
+    // }
 
     return headers;
   }
@@ -91,8 +91,8 @@ export class ApiService {
    * Phase 2+: Sends question to Gemini with API key
    */
   askAiAssistant(question: string): Observable<any> {
-    if (!environment.features.useRealApi) {
-      // Phase 1: Return dummy response
+    if (environment.ai.useMockAiResponses) {
+      // Mock response mode
       return new Observable(observer => {
         observer.next({ response: `Simulated AI response to: "${question}"` });
         observer.complete();
@@ -100,8 +100,8 @@ export class ApiService {
     }
 
     // Phase 2+: Call real Gemini API with API key
-    const geminiKey = environment.auth.geminiKey;
-    const model = environment.auth.geminiModel;
+    const geminiKey = environment.ai.geminiKey;
+    const model = environment.ai.geminiModel;
     
     if (!geminiKey) {
       return new Observable(observer => {
@@ -139,22 +139,23 @@ export class ApiService {
 
   /**
    * Store JWT token (called after successful login)
+   * Phase 2+: Used for authentication
    */
   setAuthToken(token: string): void {
-    localStorage.setItem(environment.auth.tokenKey, token);
+    localStorage.setItem('auth_token', token);
   }
 
   /**
    * Get stored JWT token
    */
   getAuthToken(): string | null {
-    return localStorage.getItem(environment.auth.tokenKey);
+    return localStorage.getItem('auth_token');
   }
 
   /**
    * Clear auth token (on logout)
    */
   logout(): void {
-    localStorage.removeItem(environment.auth.tokenKey);
+    localStorage.removeItem('auth_token');
   }
 }
