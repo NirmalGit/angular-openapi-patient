@@ -42,17 +42,17 @@ import { QueryEngineService } from '../services/query-engine.service';
     MatTableModule
   ],
   template: `
-    <mat-card class="h-full">
-      <mat-card-header class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+  <mat-card class="flex flex-col h-full w-full min-w-0 p-2 sm:p-4" style="box-sizing: border-box;">
+  <mat-card-header class="bg-gradient-to-r from-blue-50 to-indigo-50 p-2 sm:p-4">
         <mat-card-title class="flex items-center gap-2">
           <mat-icon class="text-blue-600">smart_toy</mat-icon>
           Intelligent Query Assistant
         </mat-card-title>
       </mat-card-header>
 
-      <mat-card-content class="p-6">
+  <mat-card-content class="flex flex-col flex-1 p-2 sm:p-4 md:p-6 overflow-x-auto">
         <!-- Query Input -->
-        <form (ngSubmit)="onAsk()" class="flex flex-col gap-3 mb-4">
+  <form (ngSubmit)="onAsk()" class="flex flex-col gap-3 mb-4 w-full">
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Ask about patients, procedures, doctors...</mat-label>
             <textarea 
@@ -61,11 +61,12 @@ import { QueryEngineService } from '../services/query-engine.service';
               name="question"
               rows="3"
               placeholder="E.g.:
-- Show all surgeries for Dr. Mehta this week
-- List procedures for John Doe
-- What recommendations for patient X?
-- Show all procedures scheduled for tomorrow"
-              [disabled]="isLoading()">
+ Show all surgeries for Dr. Mehta this week
+ List procedures for John Doe
+ What recommendations for patient X?
+ Show all procedures scheduled for tomorrow"
+              [disabled]="isLoading()"
+              class="resize-y min-h-[60px] max-h-[180px]">
             </textarea>
           </mat-form-field>
           
