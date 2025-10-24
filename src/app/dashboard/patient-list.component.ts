@@ -29,12 +29,12 @@ import { MockDataService } from '../services/mock-data.service';
       </mat-card-header>
       
       <mat-card-content class="p-0">
-        <div class="overflow-x-auto">
+        <div class="overflow-hidden">
           <table mat-table [dataSource]="patients" class="w-full">
             <!-- Name Column -->
             <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let patient" class="cursor-pointer hover:bg-blue-50 py-2 px-4">
+              <th mat-header-cell *matHeaderCellDef class="w-1/3">Name</th>
+              <td mat-cell *matCellDef="let patient" class="cursor-pointer hover:bg-blue-50 py-2 px-4 w-1/3">
                 <span class="text-blue-600 hover:underline" (click)="viewPatient(patient.id)">
                   {{ patient.name }}
                 </span>
@@ -43,33 +43,27 @@ import { MockDataService } from '../services/mock-data.service';
 
             <!-- Age Column -->
             <ng-container matColumnDef="age">
-              <th mat-header-cell *matHeaderCellDef>Age</th>
-              <td mat-cell *matCellDef="let patient" class="py-2 px-4">{{ patient.age }}</td>
+              <th mat-header-cell *matHeaderCellDef class="w-16">Age</th>
+              <td mat-cell *matCellDef="let patient" class="py-2 px-4 w-16">{{ patient.age }}</td>
             </ng-container>
 
             <!-- Status Column -->
             <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let patient" class="py-2 px-4">
+              <th mat-header-cell *matHeaderCellDef class="w-1/4">Status</th>
+              <td mat-cell *matCellDef="let patient" class="py-2 px-4 w-1/4">
                 <mat-chip-set aria-label="Status">
-                  <mat-chip [ngClass]="getStatusClass(patient.status)">
+                  <mat-chip [ngClass]="getStatusClass(patient.status)" class="text-xs">
                     {{ patient.status }}
                   </mat-chip>
                 </mat-chip-set>
               </td>
             </ng-container>
 
-            <!-- Procedure Column -->
-            <ng-container matColumnDef="procedure">
-              <th mat-header-cell *matHeaderCellDef>Current Procedure</th>
-              <td mat-cell *matCellDef="let patient" class="py-2 px-4">{{ patient.procedure }}</td>
-            </ng-container>
-
             <!-- Action Column -->
             <ng-container matColumnDef="action">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let patient" class="text-right py-2 px-4">
-                <button mat-icon-button (click)="viewPatient(patient.id)">
+              <th mat-header-cell *matHeaderCellDef class="w-16"></th>
+              <td mat-cell *matCellDef="let patient" class="text-right py-2 px-4 w-16">
+                <button mat-icon-button (click)="viewPatient(patient.id)" class="flex-shrink-0">
                   <mat-icon class="text-blue-600">arrow_forward</mat-icon>
                 </button>
               </td>
@@ -88,7 +82,7 @@ export class PatientListComponent {
   private mockDataService = inject(MockDataService);
 
   patients: any[] = [];
-  displayedColumns = ['name', 'age', 'status', 'procedure', 'action'];
+  displayedColumns = ['name', 'age', 'status', 'action'];
 
   constructor() {
     this.mockDataService.getPatients().subscribe(data => {

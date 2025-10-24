@@ -38,4 +38,17 @@ export class DashboardComponent {
       }
     });
   }
+
+  scrollToSection(sectionId: string): void {
+    // Close sidenav on mobile after selection
+    if (this.sidenavMode() === 'over') {
+      this.sidenavOpen.set(false);
+    }
+    
+    // Find and scroll to the section
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

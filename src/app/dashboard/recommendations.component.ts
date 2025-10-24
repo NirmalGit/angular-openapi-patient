@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,7 +41,7 @@ import { MockDataService } from '../services/mock-data.service';
                   <mat-chip size="small" disabled>{{ rec.type }}</mat-chip>
                 </div>
               </div>
-              <button mat-icon-button matTooltip="View patient">
+              <button mat-icon-button matTooltip="View patient" (click)="viewPatient(rec.patientId)">
                 <mat-icon class="text-amber-600">arrow_forward</mat-icon>
               </button>
             </div>
@@ -55,6 +56,7 @@ import { MockDataService } from '../services/mock-data.service';
 })
 export class RecommendationsComponent {
   private mockDataService = inject(MockDataService);
+  private router = inject(Router);
   
   recommendations = signal<any[]>([]);
 
@@ -68,6 +70,10 @@ export class RecommendationsComponent {
         this.recommendations.set(recs);
       }
     });
+  }
+
+  viewPatient(patientId: number): void {
+    this.router.navigate(['/patient', patientId]);
   }
 }
 
