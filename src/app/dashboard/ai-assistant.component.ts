@@ -108,19 +108,19 @@ import { QueryEngineService } from '../services/query-engine.service';
         </div>
 
         <!-- Results Display -->
-        <div *ngIf="results()" class="mt-6 space-y-4">
+        <div *ngIf="results()" class="mt-4 space-y-3 max-h-96 overflow-y-auto">
           <!-- Result Summary -->
-          <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+          <div class="p-3 bg-blue-50 border-l-4 border-blue-500 rounded text-sm">
             <p class="font-semibold text-gray-900">{{ results().summary }}</p>
           </div>
 
           <!-- Procedure Results -->
-          <div *ngIf="results().type === 'procedures' && results().data && results().data.length > 0">
-            <h3 class="font-semibold text-gray-900 mb-3">Procedures Found ({{ results().data.length }})</h3>
-            <div class="space-y-2">
-              <div *ngFor="let proc of results().data" class="p-3 bg-gray-50 border border-gray-200 rounded">
-                <div class="font-semibold text-sm text-gray-900">{{ proc.name }}</div>
-                <div class="text-xs text-gray-600 mt-1">
+          <div *ngIf="results().type === 'procedures' && results().data && results().data.length > 0" class="space-y-2">
+            <h3 class="font-semibold text-gray-900 text-sm mb-2">Procedures Found ({{ results().data.length }})</h3>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              <div *ngFor="let proc of results().data" class="p-2 bg-gray-50 border border-gray-200 rounded text-xs">
+                <div class="font-semibold text-gray-900">{{ proc.name }}</div>
+                <div class="text-gray-600 mt-1 space-y-1">
                   <p><strong>Surgeon:</strong> {{ proc.surgeon }}</p>
                   <p><strong>Duration:</strong> {{ proc.duration }}</p>
                   <p><strong>Scheduled:</strong> {{ proc.scheduled }}</p>
@@ -131,12 +131,12 @@ import { QueryEngineService } from '../services/query-engine.service';
           </div>
 
           <!-- Patients List Results -->
-          <div *ngIf="results().type === 'patients' && results().data && results().data.length > 0">
-            <h3 class="font-semibold text-gray-900 mb-3">Patients Found ({{ results().data.length }})</h3>
-            <div class="space-y-2">
-              <div *ngFor="let patient of results().data" class="p-3 bg-green-50 border border-green-200 rounded">
-                <div class="font-semibold text-sm text-gray-900">{{ patient.name }}</div>
-                <div class="text-xs text-gray-600 mt-1">
+          <div *ngIf="results().type === 'patients' && results().data && results().data.length > 0" class="space-y-2">
+            <h3 class="font-semibold text-gray-900 text-sm mb-2">Patients Found ({{ results().data.length }})</h3>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              <div *ngFor="let patient of results().data" class="p-2 bg-green-50 border border-green-200 rounded text-xs">
+                <div class="font-semibold text-gray-900">{{ patient.name }}</div>
+                <div class="text-gray-600 mt-1 space-y-1">
                   <p><strong>Age:</strong> {{ patient.age }}</p>
                   <p><strong>Status:</strong> <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">{{ patient.status }}</span></p>
                   <p><strong>Current Procedure:</strong> {{ patient.procedure }}</p>
@@ -152,9 +152,9 @@ import { QueryEngineService } from '../services/query-engine.service';
           </div>
 
           <!-- Patient Info Results -->
-          <div *ngIf="results().type === 'patient_info' && results().data">
-            <h3 class="font-semibold text-gray-900 mb-3">Patient Information</h3>
-            <div class="p-4 bg-blue-50 border border-blue-200 rounded space-y-2 text-sm">
+          <div *ngIf="results().type === 'patient_info' && results().data" class="space-y-2">
+            <h3 class="font-semibold text-gray-900 text-sm mb-2">Patient Information</h3>
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded text-xs space-y-1">
               <p><strong>Name:</strong> {{ results().data.name }}</p>
               <p><strong>Age:</strong> {{ results().data.age }}</p>
               <p><strong>Status:</strong> {{ results().data.status }}</p>
@@ -170,17 +170,17 @@ import { QueryEngineService } from '../services/query-engine.service';
           </div>
 
           <!-- Recommendations Results -->
-          <div *ngIf="results().type === 'recommendations' && results().data && results().data.length > 0">
-            <h3 class="font-semibold text-gray-900 mb-3">Recommendations ({{ results().data.length }})</h3>
-            <div class="space-y-2">
-              <div *ngFor="let rec of results().data" class="p-3 bg-amber-50 border-l-4 border-amber-400 rounded">
+          <div *ngIf="results().type === 'recommendations' && results().data && results().data.length > 0" class="space-y-2">
+            <h3 class="font-semibold text-gray-900 text-sm mb-2">Recommendations ({{ results().data.length }})</h3>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              <div *ngFor="let rec of results().data" class="p-2 bg-amber-50 border-l-4 border-amber-400 rounded text-xs">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
-                    <div class="font-semibold text-sm text-gray-900">{{ rec.title }}</div>
-                    <p class="text-xs text-gray-700 mt-1">{{ rec.description }}</p>
+                    <div class="font-semibold text-gray-900">{{ rec.title }}</div>
+                    <p class="text-gray-700 mt-1">{{ rec.description }}</p>
                   </div>
-                  <mat-chip-set aria-label="Priority">
-                    <mat-chip [ngClass]="getPriorityClass(rec.priority)">
+                  <mat-chip-set aria-label="Priority" class="ml-2">
+                    <mat-chip [ngClass]="getPriorityClass(rec.priority)" class="text-xs">
                       {{ rec.priority }}
                     </mat-chip>
                   </mat-chip-set>
