@@ -22,17 +22,15 @@ import { RecommendationsComponent } from './recommendations.component';
       <!-- Mobile: Stack vertically, Desktop: 3-column layout -->
       <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <!-- Column 1: Patient List -->
-        <div class="lg:col-span-1">
+        <div>
           <app-patient-list></app-patient-list>
         </div>
-        
         <!-- Column 2: Procedures List -->
-        <div class="lg:col-span-1">
+        <div>
           <app-procedure-list></app-procedure-list>
         </div>
-        
         <!-- Column 3: AI Assistant & Recommendations -->
-        <div class="lg:col-span-2 xl:col-span-1 space-y-6">
+        <div class="space-y-6">
           <app-ai-assistant></app-ai-assistant>
           <app-recommendations></app-recommendations>
         </div>
