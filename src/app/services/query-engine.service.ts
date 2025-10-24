@@ -38,28 +38,36 @@ export class QueryEngineService {
     // Execute based on intent
     switch (parsed.intent) {
       case 'search_procedures_by_surgeon':
+        console.log('[QueryEngine] Executing search_procedures_by_surgeon');
         return this.findProceduresBySurgeon(parsed.surgeon, parsed.dateRange);
 
       case 'search_procedures_by_patient':
+        console.log('[QueryEngine] Executing search_procedures_by_patient');
         return this.findProceduresByPatient(parsed.patientName);
 
       case 'search_procedures_by_type':
+        console.log('[QueryEngine] Executing search_procedures_by_type');
         return this.findProceduresByType(parsed.procedureType);
 
       case 'get_patient_info':
+        console.log('[QueryEngine] Executing get_patient_info');
         return this.getPatientInfo(parsed.patientName);
 
       case 'search_patients_by_status':
+        console.log('[QueryEngine] Executing search_patients_by_status with context:', parsed.context);
         return this.searchPatientsByStatus(parsed.context);
 
       case 'get_recommendations':
+        console.log('[QueryEngine] Executing get_recommendations');
         return this.getRecommendations(parsed.context);
 
       case 'search_by_date':
+        console.log('[QueryEngine] Executing search_by_date');
         return this.searchByDateRange(parsed.dateRange);
 
       case 'general_query':
       default:
+        console.log('[QueryEngine] Executing general_query fallback');
         return this.handleGeneralQuery(normalizedQuery);
     }
   }
@@ -102,7 +110,7 @@ export class QueryEngineService {
     }
     
     // Detect recommendations ONLY if no patient keywords found
-    if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest']) && 
+    if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest', 'preparation', 'pre-op', 'pre op']) && 
         !this.matchesPattern(query, ['patients', 'patient', 'admitted', 'discharged'])) {
       result.intent = 'get_recommendations';
       result.context = query;
