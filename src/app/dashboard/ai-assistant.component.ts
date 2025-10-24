@@ -224,6 +224,9 @@ export class AiAssistantComponent {
     // Execute query through agentic engine
     this.queryEngine.executeQuery(this.question).subscribe({
       next: (result) => {
+        console.log('[AI Assistant] Received result:', result);
+        console.log('[AI Assistant] Result type:', result.type);
+        console.log('[AI Assistant] Result data length:', result.data?.length);
         this.results.set(result);
         this.isLoading.set(false);
       },

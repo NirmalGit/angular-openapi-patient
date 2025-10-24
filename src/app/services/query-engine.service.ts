@@ -77,57 +77,85 @@ export class QueryEngineService {
       context: ''
     };
 
+    console.log('[QueryEngine] Parsing query:', query);
+
     // Detect patients by status search (HIGHEST PRIORITY)
-    if (this.matchesPattern(query, ['patients', 'patient'])) {
+    if (this.matchesPattern(query, ['patients', 'patient', 'admitted', 'discharged', 'recovery'])) {
+      console.log('[QueryEngine] Detected patient-related query');
+      
       // Check if it's a status-specific search
       if (this.matchesPattern(query, ['discharge', 'discharged', 'admitted', 'pending', 'recovery', 'recovering'])) {
         result.intent = 'search_patients_by_status';
         result.context = this.extractPatientStatus(query);
-      } else {
+        console.log('[QueryEngine] Status-specific patient search, context:', result.context);
+      } else if (this.matchesPattern(query, ['all', 'show', 'list'])) {
         // General patient search - show all patients
         result.intent = 'search_patients_by_status';
         result.context = 'all';
+        console.log('[QueryEngine] General patient search - showing all');
+      } else {
+        result.intent = 'search_patients_by_status';
+        result.context = 'all';
+        console.log('[QueryEngine] Default patient search - showing all');
       }
+      return result; // Early return to prevent other matches
     }
+    
+    // Detect recommendations ONLY if no patient keywords found
+    if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest']) && 
+        !this.matchesPattern(query, ['patients', 'patient', 'admitted', 'discharged'])) {
+      result.intent = 'get_recommendations';
+      result.context = query;
+      console.log('[QueryEngine] Detected recommendations query');
+      return result;
+    }
+    
     // Detect surgeon search
-    else if (this.matchesPattern(query, ['surgeon', 'dr.', 'doctor', 'dr ', 'for dr'])) {
+    if (this.matchesPattern(query, ['surgeon', 'dr.', 'doctor', 'dr ', 'for dr'])) {
       result.intent = 'search_procedures_by_surgeon';
       result.surgeon = this.extractSurgeon(query);
       result.dateRange = this.extractDateRange(query);
+      console.log('[QueryEngine] Detected surgeon search');
+      return result;
     }
+    
     // Detect specific patient search by name
-    else if (this.matchesPattern(query, ['john', 'jane', 'alice', 'robert', 'carol', 'maria']) && 
-             this.matchesPattern(query, ['patient', 'for', 'procedures', 'info'])) {
+    if (this.matchesPattern(query, ['john', 'jane', 'alice', 'robert', 'carol', 'maria']) && 
+        this.matchesPattern(query, ['patient', 'for', 'procedures', 'info'])) {
       result.intent = 'search_procedures_by_patient';
       result.patientName = this.extractName(query);
+      console.log('[QueryEngine] Detected patient-specific search');
+      return result;
     }
+    
     // Detect procedure type search
-    else if (this.matchesPattern(query, ['surgery', 'surgeries', 'procedure', 'procedures', 'surgery', 'operation'])) {
+    if (this.matchesPattern(query, ['surgery', 'surgeries', 'procedure', 'procedures', 'operation'])) {
       if (this.matchesPattern(query, ['all', 'show', 'list'])) {
         result.intent = 'search_procedures_by_type';
         result.procedureType = this.extractProcedureType(query);
+        console.log('[QueryEngine] Detected procedure type search');
+        return result;
       }
     }
-    // Detect recommendations
-    else if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest'])) {
-      result.intent = 'get_recommendations';
-      result.context = query;
-    }
+    
     // Detect date-based search
-    else if (this.matchesPattern(query, ['today', 'tomorrow', 'week', 'month', 'date', 'scheduled'])) {
+    if (this.matchesPattern(query, ['today', 'tomorrow', 'week', 'month', 'date', 'scheduled'])) {
       result.intent = 'search_by_date';
       result.dateRange = this.extractDateRange(query);
+      console.log('[QueryEngine] Detected date-based search');
+      return result;
     }
+    
     // Detect patient info request
-    else if (this.matchesPattern(query, ['info', 'profile', 'details', 'history', 'medical'])) {
+    if (this.matchesPattern(query, ['info', 'profile', 'details', 'history', 'medical'])) {
       result.intent = 'get_patient_info';
       result.patientName = this.extractName(query);
+      console.log('[QueryEngine] Detected patient info request');
+      return result;
     }
-    // Fallback: If query contains "patients" but no specific intent detected, show all patients
-    else if (this.matchesPattern(query, ['patients', 'patient'])) {
-      result.intent = 'search_patients_by_status';
-      result.context = 'all';
-    }
+
+    console.log('[QueryEngine] No specific intent detected, using general query');
+    return result;
 
     return result;
   }
@@ -220,13 +248,28 @@ export class QueryEngineService {
   private extractPatientStatus(query: string): string {
     const lowerQuery = query.toLowerCase();
     
+    console.log('[QueryEngine] Extracting status from query:', query);
+    
     // Handle various forms of status queries - return capitalized versions to match data
-    if (lowerQuery.includes('discharge') || lowerQuery.includes('discharged')) return 'Discharged';
-    if (lowerQuery.includes('admit') || lowerQuery.includes('admitted')) return 'Admitted';
-    if (lowerQuery.includes('recovery') || lowerQuery.includes('recovering')) return 'In Recovery';
-    if (lowerQuery.includes('pending')) return 'pending';
+    if (lowerQuery.includes('discharge') || lowerQuery.includes('discharged')) {
+      console.log('[QueryEngine] Found discharged status');
+      return 'Discharged';
+    }
+    if (lowerQuery.includes('admit') || lowerQuery.includes('admitted')) {
+      console.log('[QueryEngine] Found admitted status');
+      return 'Admitted';
+    }
+    if (lowerQuery.includes('recovery') || lowerQuery.includes('recovering') || lowerQuery.includes('in recovery')) {
+      console.log('[QueryEngine] Found recovery status');
+      return 'In Recovery';
+    }
+    if (lowerQuery.includes('pending')) {
+      console.log('[QueryEngine] Found pending status');
+      return 'Pending';
+    }
     
     // Default to looking for any status if no specific one found
+    console.log('[QueryEngine] No specific status found, defaulting to all');
     return 'all';
   }
 
@@ -357,15 +400,26 @@ export class QueryEngineService {
         let filtered;
         let summaryText;
 
+        console.log('[QueryEngine] Searching patients by status:', status);
+        console.log('[QueryEngine] Available patients:', patients.map(p => ({ name: p.name, status: p.status })));
+
         if (status === 'all') {
           // Show all patients if no specific status detected
           filtered = patients;
           summaryText = `Found all ${filtered.length} patient(s)`;
         } else {
-          // Filter by specific status
-          filtered = patients.filter((p: any) =>
-            p.status.toLowerCase().includes(status.toLowerCase())
-          );
+          // Filter by specific status - exact match or partial match
+          filtered = patients.filter((p: any) => {
+            const patientStatus = p.status.toLowerCase();
+            const searchStatus = status.toLowerCase();
+            
+            // Check for exact match or partial match
+            return patientStatus === searchStatus || 
+                   patientStatus.includes(searchStatus) ||
+                   searchStatus.includes(patientStatus);
+          });
+          
+          console.log('[QueryEngine] Filtered patients:', filtered.map(p => ({ name: p.name, status: p.status })));
           
           if (filtered.length === 0) {
             // If no patients found, provide helpful information
