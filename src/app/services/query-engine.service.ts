@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { inject } from '@angular/core';
 import { MockDataService } from './mock-data.service';
-import { Observable, map } from 'rxjs';
+import { ApiService } from './api.service';
+import { environment } from '../config/environment';
+import { Observable, map, switchMap, of } from 'rxjs';
 
 /**
  * Agentic Query Engine Service
@@ -19,11 +21,123 @@ import { Observable, map } from 'rxjs';
 })
 export class QueryEngineService {
   private mockDataService = inject(MockDataService);
+  private apiService = inject(ApiService);
 
   /**
    * Parse a natural language query and execute intelligent search
    */
   executeQuery(query: string): Observable<any> {
+    // Check if we should use Gemini AI
+    if (this.shouldUseGeminiAI(query)) {
+      console.log('[QueryEngine] Using Gemini AI for query:', query);
+      return this.executeWithGeminiAI(query);
+    }
+
+    // Fallback to keyword-based parsing
+    console.log('[QueryEngine] Using keyword parsing for query:', query);
+    return this.executeWithKeywordParsing(query);
+  }
+
+  /**
+   * Check if we should use Gemini AI for this query
+   */
+  private shouldUseGeminiAI(query: string): boolean {
+    // Use Gemini if API key is available and not in mock mode
+    return !environment.ai.useMockAiResponses && 
+           !!environment.ai.geminiKey && 
+           environment.ai.geminiKey.length > 0;
+  }
+
+  /**
+   * Execute query using Gemini AI
+   */
+  private executeWithGeminiAI(query: string): Observable<any> {
+    // Create a comprehensive prompt for the AI
+    const prompt = this.buildGeminiPrompt(query);
+    
+    return this.apiService.askAiAssistant(prompt).pipe(
+      map(response => {
+        console.log('[QueryEngine] Gemini response:', response);
+        
+        // Parse Gemini's response and format it for our UI
+        return this.parseGeminiResponse(response, query);
+      })
+    );
+  }
+
+  /**
+   * Build a comprehensive prompt for Gemini AI
+   */
+  private buildGeminiPrompt(query: string): string {
+    return `You are an intelligent hospital management assistant. Analyze this query and provide a helpful response based on the hospital data.
+
+Query: "${query}"
+
+Available hospital data:
+- Patients: John Doe (45, Admitted, Knee Replacement), Jane Smith (60, Discharged, Cataract Surgery), Alice Johnson (32, Admitted, Appendectomy), Robert Wilson (72, In Recovery, Hip Replacement), Maria Garcia (48, Admitted, Cardiac Catheterization)
+- Procedures: Knee Replacement, Cataract Surgery, Appendectomy, Hip Replacement, Cardiac Catheterization
+- Surgeons: Dr. James Anderson, Dr. Sarah Williams, Dr. Michael Chen, Dr. David Martinez
+- Statuses: Admitted, Discharged, In Recovery, Pending
+
+Please provide a structured response that includes:
+1. What the user is asking for
+2. Relevant data from the hospital records
+3. Any recommendations or insights
+
+Format your response as JSON with these fields:
+- type: "patients", "procedures", "recommendations", or "general_response"
+- summary: A brief summary of the findings
+- data: Array of relevant items (or null for general responses)
+- count: Number of items found (or 0)
+
+If the query doesn't match any specific data, provide a helpful general response.`;
+  }
+
+  /**
+   * Parse Gemini's response into our expected format
+   */
+  private parseGeminiResponse(geminiResponse: any, originalQuery: string): any {
+    try {
+      // Extract the text from Gemini's response
+      const responseText = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text || 
+                          geminiResponse.response || 
+                          JSON.stringify(geminiResponse);
+      
+      console.log('[QueryEngine] Parsing Gemini text response:', responseText);
+      
+      // Try to parse as JSON first
+      try {
+        const parsed = JSON.parse(responseText);
+        return {
+          type: parsed.type || 'general_response',
+          summary: parsed.summary || `AI Response to: "${originalQuery}"`,
+          data: parsed.data || null,
+          count: parsed.count || 0
+        };
+      } catch (jsonError) {
+        // If not JSON, return as general response
+        return {
+          type: 'general_response',
+          summary: responseText,
+          data: null,
+          count: 0
+        };
+      }
+    } catch (error) {
+      console.error('[QueryEngine] Error parsing Gemini response:', error);
+      return {
+        type: 'general_response',
+        summary: `AI Analysis: ${originalQuery}`,
+        data: null,
+        count: 0
+      };
+    }
+  }
+
+  /**
+   * Execute query using keyword parsing (fallback method)
+   */
+  private executeWithKeywordParsing(query: string): Observable<any> {
     // Normalize the query
     const normalizedQuery = query.toLowerCase().trim();
 
@@ -110,7 +224,7 @@ export class QueryEngineService {
     }
     
     // Detect recommendations ONLY if no patient keywords found
-    if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest', 'preparation', 'pre-op', 'pre op']) && 
+    if (this.matchesPattern(query, ['recommend', 'recommendation', 'advice', 'suggest']) && 
         !this.matchesPattern(query, ['patients', 'patient', 'admitted', 'discharged'])) {
       result.intent = 'get_recommendations';
       result.context = query;
@@ -526,6 +640,15 @@ export class QueryEngineService {
    * Handle general queries with keyword matching
    */
   private handleGeneralQuery(query: string): Observable<any> {
+    // Special handling for preparation-related queries
+    if (query.toLowerCase().includes('preparation') || query.toLowerCase().includes('pre-op') || query.toLowerCase().includes('pre op')) {
+      return of({
+        type: 'general_response',
+        data: null,
+        summary: `For preparation and recommendation information, please click the "Recommendations" menu item in the sidebar to view intelligent recommendations.`
+      });
+    }
+
     // If query mentions allergies, show a summary of patient allergies
     if (query.toLowerCase().includes('allergies')) {
       return this.mockDataService.getPatients().pipe(
@@ -547,7 +670,7 @@ export class QueryEngineService {
       map(stats => ({
         type: 'general_response',
         data: stats,
-        summary: `Hospital Status: ${stats.totalPatients} patients, ${stats.totalProcedures} procedures, undefined recommendations`
+        summary: `Hospital Status: ${stats.totalPatients} patients, ${stats.totalProcedures} procedures, ${stats.admittedPatients} admitted`
       }))
     );
   }

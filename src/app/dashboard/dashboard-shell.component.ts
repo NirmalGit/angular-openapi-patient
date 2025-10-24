@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardComponent } from './dashboard.component';
 import { PatientListComponent } from './patient-list.component';
 import { ProcedureListComponent } from './procedure-list.component';
 import { AiAssistantComponent } from './ai-assistant.component';
 import { RecommendationsComponent } from './recommendations.component';
+import { DashboardStateService } from '../services/dashboard-state.service';
 
 @Component({
   selector: 'app-dashboard-shell',
@@ -29,12 +30,12 @@ import { RecommendationsComponent } from './recommendations.component';
         <div class="mb-4 lg:mb-0 overflow-x-auto min-w-0 flex flex-col lg:col-span-2 xl:col-span-2" data-section="procedures">
           <app-procedure-list></app-procedure-list>
         </div>
-        <!-- Column 3: AI Assistant & Recommendations -->
+        <!-- Column 3: AI Assistant & Recommendations (conditional) -->
         <div class="space-y-6 overflow-x-auto min-w-0 flex flex-col lg:col-span-1 xl:col-span-2">
           <div data-section="ai-assistant">
             <app-ai-assistant></app-ai-assistant>
           </div>
-          <div data-section="recommendations">
+          <div *ngIf="showRecommendations()" data-section="recommendations">
             <app-recommendations></app-recommendations>
           </div>
         </div>
@@ -42,4 +43,9 @@ import { RecommendationsComponent } from './recommendations.component';
     </app-dashboard>
   `
 })
-export class DashboardShellComponent {}
+export class DashboardShellComponent {
+  private dashboardState = inject(DashboardStateService);
+
+  // Angular 20: Using computed signal for reactive visibility
+  showRecommendations = this.dashboardState.isRecommendationsVisible;
+}
