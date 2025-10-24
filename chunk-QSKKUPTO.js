@@ -1,1 +1,0 @@
-import{W as r,v as e,xb as i}from"./chunk-F2POPD2Z.js";var c=(()=>{class t{static \u0275fac=function(a){return new(a||t)};static \u0275mod=r({type:t});static \u0275inj=e({imports:[i,i]})}return t})();export{c as a};

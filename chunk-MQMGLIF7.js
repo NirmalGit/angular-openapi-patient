@@ -1,0 +1,1 @@
+import{W as r,v as e,zb as i}from"./chunk-RUV7TUL4.js";var c=(()=>{class t{static \u0275fac=function(a){return new(a||t)};static \u0275mod=r({type:t});static \u0275inj=e({imports:[i,i]})}return t})();export{c as a};
