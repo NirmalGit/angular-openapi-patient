@@ -1,0 +1,33 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Inject Gemini API Key
+        run: |
+          echo "export const environment = { production: true, ai: { geminiKey: '${{ secrets.GEMINI_API_KEY }}', geminiModel: 'gemini-2.0-flash', useMockAiResponses: false }, features: { useRealApi: false, enableAiAssistant: true, enableRecommendations: true, enableRealTimeUpdates: false } };" > src/app/config/environment.prod.ts
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production --base-href /angular-openapi-patient/
+
+      - name: Deploy to GitHub Pages
+        uses: angular-schule/ngx-deploy-gh-pages@v14
+        with:
+          base-href: /angular-openapi-patient/
